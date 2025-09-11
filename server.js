@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import connectToDatabase from './config/db.js';
 import {loadConfig} from './config/loadConfig.js';
+import userRoutes from './routes/userRoutes/indexRoutes.js';
+
 const startServer = async () => {
     try {
         const config = await loadConfig();
@@ -18,6 +20,7 @@ const startServer = async () => {
 
         await connectToDatabase(config.DB_URI);
 
+        app.use('/api/users', userRoutes);
 
         const PORT = config.PORT || 1010;
         app.listen(PORT, () => {
