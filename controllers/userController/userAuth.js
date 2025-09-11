@@ -5,17 +5,15 @@ import { sendEmail } from '../../utils/sendEmail.js';
 import { loadConfig } from '../../config/loadConfig.js';
 import { generateOTP } from '../../utils/genrateOTP.js';
 import { emailTamplates } from '../../utils/emailTemplate.js';
-
-const config = await loadConfig();
+const config = loadConfig();
 
 const signup = async (req, res) => {
     try {
-        const { name, email, mobileNumber, password } = req.body;
+        const { name, email, mobileNumber} = req.body;
         const fields = [
             { key: "name", value: name },
             { key: "email", value: email },
             { key: "mobileNumber", value: mobileNumber },
-            { key: "password", value: password },
         ];
 
         const missing = fields.find(f => !f.value);
@@ -53,7 +51,7 @@ const signup = async (req, res) => {
                 existingUser.otpExpiry = expiry;
                 await existingUser.save();
 
-                const { subject, body } = emailTamplates.otpVerification(name, otp);
+                const { subject, body } = emailTamplates.signupOTP(name, otp);
                 const otpSent = await sendEmail({ email, subject, body });
                 if (!otpSent.success) {
                     return res.status(500).json({
@@ -69,22 +67,19 @@ const signup = async (req, res) => {
             }
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
         const { otp, expiry } = generateOTP();
 
         const newUser = new userModel({
             name,
             email,
             mobileNumber,
-            password: hashedPassword,
             otp,
             otpExpiry: expiry,
             isVerified: false
         });
         await newUser.save();
 
-        const { subject, body } = emailTamplates.otpVerification(name, otp);
+        const { subject, body } = emailTamplates.signupOTP(name, otp);
         const otpSent = await sendEmail({ email, subject, body });
 
         if (!otpSent.success) {
@@ -105,4 +100,113 @@ const signup = async (req, res) => {
     }
 }
 
-export { signup };
+const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({
+                status: 400,
+                message: "Email and OTP are required",
+            });
+        }
+
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message:"User not found",
+            });
+        }
+
+        if (user.otp !== otp) {
+            return res.status(400).json({
+                status: 400,
+                message: "Invalid OTP"
+            });
+        }
+
+        const currentTime = new Date();
+        if (user.otpExpiry < currentTime) {
+            return res.status(400).json({
+                status: 400,
+                 message: "OTP has expired. Please request a new one."
+            });
+        }
+
+        user.otp = undefined;
+        user.otpExpiry = undefined;
+        user.isVerified = true;
+
+        await user.save();
+
+        const token = jwt.sign(
+                    { id: user._id, email: user.email },
+                    config.ACCESS_TOKEN_SECRET,
+                    { expiresIn: "10m" }
+                );
+
+        return res.status(200).json({
+            status: 200,
+            message: "OTP verified successfully. Now set your password.",
+            token,
+            data: user
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: error.message,
+        });
+    }
+};
+
+const setPassword = async (req, res) => {
+    try {
+        const { password, email } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                status: 400,
+                message: "Please provide email and password to proceed.",
+            });
+        }
+
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,12}$/;
+
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                status: 400,
+                message: "Password must be 6-12 characters long, contain at least one uppercase letter, one number, and one special character.",
+            });
+        }
+
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({
+            status: 200,
+            message: "Your password has been set successfully.",
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: error.message,
+        });
+    }
+};
+
+
+export { signup, verifyOtp, setPassword };
