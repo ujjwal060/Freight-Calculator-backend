@@ -1,0 +1,67 @@
+import jwt from "jsonwebtoken";
+import UserModel from "../models/userModel.js";
+import { loadConfig } from "../config/loadConfig.js";
+const config = await loadConfig();
+
+const authenticateUser = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+            status: 401,
+            message: "Unauthorized access.",
+        });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+
+        req.user = {
+            userId: decoded.userid,
+        };
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            status: 401,
+            message: "expired token. Please login again.",
+        });
+    }
+};
+
+const refreshToken = async (req, res) => {
+    try {
+        const token=req.body.refreshToken;
+        
+        const decoded = jwt.verify(token,config.REFRESH_TOKEN_SECRET);
+
+        const user = await UserModel.findOne({ _id: decoded.userId, refreshToken:token });
+
+        if (!user) {
+            return res.status(403).json({
+                status: 403,
+                message: "Invalid refresh token.",
+            });
+        }
+
+        const newAccessToken = jwt.sign(
+            { userid: user.id, email: user.email, mobile: user.mobile },
+            config.ACCESS_TOKEN_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        return res.status(200).json({
+            status: 200,
+            message: "New access token generated.",
+            accessToken: newAccessToken,
+        });
+    } catch (error) {
+        return res.status(403).json({
+            status: 403,
+            message: "Expired refresh token. Please login again.",
+        });
+    }
+}
+
+export { authenticateUser, refreshToken };
