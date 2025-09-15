@@ -34,17 +34,24 @@ const loginAdmin = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: adminUser._id},
+            { id: adminUser._id },
             config.ACCESS_TOKEN_SECRET,
             { expiresIn: "1d" }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: adminUser._id },
+            config.REFRESH_TOKEN_SECRET,
+            { expiresIn: "30d" }
         );
 
         return res.status(200).json({
             status: 200,
             message: "Admin logged in successfully",
-            token,
             admin: {
-                id: adminUser._id
+                id: adminUser._id,
+                token,
+                refreshToken,
             }
         });
     } catch (error) {
@@ -142,7 +149,7 @@ const verifyOtp = async (req, res) => {
 
         const token = jwt.sign(
             { id: adminUser._id },
-            config.JWT_SECRET,
+            config.ACCESS_TOKEN_SECRET,
             { expiresIn: "15m" }
         );
 
