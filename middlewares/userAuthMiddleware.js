@@ -36,7 +36,7 @@ const refreshToken = async (req, res) => {
         
         const decoded = jwt.verify(token,config.REFRESH_TOKEN_SECRET);
 
-        const user = await UserModel.findOne({ _id: decoded.userId, refreshToken:token });
+        const user = await UserModel.findOne({ _id: decoded.userId});
 
         if (!user) {
             return res.status(403).json({
@@ -46,7 +46,7 @@ const refreshToken = async (req, res) => {
         }
 
         const newAccessToken = jwt.sign(
-            { userid: user.id, email: user.email, mobile: user.mobile },
+            { userid: user.id},
             config.ACCESS_TOKEN_SECRET,
             { expiresIn: "1d" }
         );
