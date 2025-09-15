@@ -300,7 +300,7 @@ const resendOtp = async (req, res) => {
 }
 
 const login = async (req, res) => {
-    try{
+    try {
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -326,7 +326,7 @@ const login = async (req, res) => {
             });
         }
 
-       const accessToken = jwt.sign(
+        const accessToken = jwt.sign(
             { userid: user._id },
             config.ACCESS_TOKEN_SECRET,
             { expiresIn: "1d" }
@@ -345,7 +345,7 @@ const login = async (req, res) => {
             userId: user._id,
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
             status: 500,
             message: error.message,
@@ -378,4 +378,42 @@ const getUserProfile = async (req, res) => {
     }
 }
 
-export { signup, verifyOtp, setPassword, forgotPassword, resendOtp, login, getUserProfile };
+const editUserProfile = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { name, mobileNumber } = req.body;
+
+        if (!name && !mobileNumber) {
+            return res.status(400).json({
+                status: 400,
+                message: "Please provide at least one field to update (name or mobileNumber)",
+            });
+        }
+
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found",
+            });
+        }
+
+        if (name) user.name = name;
+        if (mobileNumber) user.mobileNumber = mobileNumber;
+        await user.save();
+
+        return res.status(200).json({
+            status: 200,
+            message: "User profile updated successfully",
+            data: user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: error.message,
+        });
+    }
+};
+
+
+export { signup, verifyOtp, setPassword, forgotPassword, resendOtp, login, getUserProfile, editUserProfile };

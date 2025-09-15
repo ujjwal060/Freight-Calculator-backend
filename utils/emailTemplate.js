@@ -1,5 +1,5 @@
-const emailTamplates ={
-    signupOTP: (name, otp) => ({
+const emailTamplates = {
+  signupOTP: (name, otp) => ({
     subject: "Complete Your Signup - Verify with OTP",
     body: `
       Hi ${name},
@@ -16,7 +16,7 @@ const emailTamplates ={
     `
   }),
 
-   forgotPasswordOTP: (name, otp) => ({
+  forgotPasswordOTP: (name, otp) => ({
     subject: "Reset Your Password - OTP Verification",
     body: `
       Hi ${name},
@@ -36,10 +36,10 @@ const emailTamplates ={
   }),
 
   resendOTP: (name, otp, type) => {
-  if (type === "signup") {
-    return {
-      subject: "Verify Your Account - OTP Verification",
-      body: `
+    if (type === "signup") {
+      return {
+        subject: "Verify Your Account - OTP Verification",
+        body: `
         Hi ${name},
         
         You requested to resend your OTP for completing registration.
@@ -54,13 +54,13 @@ const emailTamplates ={
         Thank you,  
         Team Freight Calculator
       `
-    };
-  }
+      };
+    }
 
-  if (type === "forgotPassword") {
-    return {
-      subject: "Reset Your Password - OTP Verification",
-      body: `
+    if (type === "forgotPassword") {
+      return {
+        subject: "Reset Your Password - OTP Verification",
+        body: `
         Hi ${name},
         
         You requested to resend your OTP for password reset.
@@ -75,9 +75,49 @@ const emailTamplates ={
         Thank you,  
         Team Freight Calculator
       `
+      };
+    }
+  },
+
+  forgotPasswordAdminOTP: (otp) => ({
+    subject: "Admin Password Reset - OTP Verification",
+    body: `
+      Hello Admin,
+      
+      A request has been received to reset the admin account password.
+
+      Your One-Time Password (OTP) is: ${otp}
+
+      Please use this OTP to reset your password. 
+      Note: This OTP will expire in 10 minutes.
+
+      If you did not request this change, please contact support immediately.
+
+      Thank you,  
+      Team Freight Calculator
+    `
+  }),
+
+  resendAdminOTP: (otp) => {
+    return {
+      subject: "Admin Password Reset - OTP Verification",
+      body: `
+      Hello Admin,
+
+      You requested to resend the OTP for resetting the admin account password.
+
+      Your One-Time Password (OTP) is: ${otp}
+
+      Please use this OTP to reset your password.
+      Note: This OTP will expire in 10 minutes.
+
+      If you did not request this, please contact support immediately.
+
+      Thank you,  
+      Team Freight Calculator
+    `
     };
-  }
-}
+  },
 
 }
-export {emailTamplates};
+export { emailTamplates };

@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import UserModel from "../models/userModel.js";
 import { loadConfig } from "../config/loadConfig.js";
+import admin from "../models/adminModel.js";
 const config = await loadConfig();
+
 
 const authenticateUser = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -19,7 +20,7 @@ const authenticateUser = async (req, res, next) => {
         const decoded = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
 
         req.user = {
-            userId: decoded.userid,
+            id: decoded.id,
         };
         next();
     } catch (error) {
@@ -36,7 +37,7 @@ const refreshToken = async (req, res) => {
         
         const decoded = jwt.verify(token,config.REFRESH_TOKEN_SECRET);
 
-        const user = await UserModel.findOne({ _id: decoded.userId});
+        const user = await admin.findOne({ _id: decoded.id});
 
         if (!user) {
             return res.status(403).json({
@@ -46,7 +47,7 @@ const refreshToken = async (req, res) => {
         }
 
         const newAccessToken = jwt.sign(
-            { userid: user.id},
+            { id: user.id },
             config.ACCESS_TOKEN_SECRET,
             { expiresIn: "1d" }
         );
