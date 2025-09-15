@@ -1,4 +1,4 @@
-import FreightRateModel from "../../models/FreightRateModel";
+import FreightRateModel from '../../models/FreightRateModel.js';
 
 const addFreightRate = async (req, res) => {
     try {

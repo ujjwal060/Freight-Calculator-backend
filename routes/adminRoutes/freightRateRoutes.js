@@ -1,12 +1,12 @@
-import exprees from 'express';
-import { addFreightRate, deleteFreightRate, getAllFreightRates, updateFreightRate } from '../../controllers/adminControllers/freightRateController.js';
-import { verifyAdmin } from '../../middlewares/authMiddleware.js';
+import express from 'express';
+import { addFreightRate, deleteFreightRate, getAllFreightRates, updateFreightRate }from "../../controllers/adminController/freightRateController.js";
+import { authenticateUser }from "../../middlewares/adminAuthMiddleware.js";
 
-const router = exprees.Router();
+const router = express.Router();
 
-router.post('/add', verifyAdmin, addFreightRate);
-router.put('/update/:id', verifyAdmin, updateFreightRate);
-router.delete('/delete/:id', verifyAdmin, deleteFreightRate);
-router.post('/list', verifyAdmin, getAllFreightRates);
+router.post('/add', authenticateUser, addFreightRate);
+router.put('/update/:id', authenticateUser, updateFreightRate);
+router.delete('/delete/:id', authenticateUser, deleteFreightRate);
+router.post('/list', authenticateUser, getAllFreightRates);
 
 export default router;
