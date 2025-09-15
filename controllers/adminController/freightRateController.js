@@ -113,7 +113,7 @@ const deleteFreightRate = async (req, res) => {
 
 const getAllFreightRates = async (req, res) => {
     try {
-        let { limit = 10, offset = 0, sortField, sortBy } = req.body;
+        let { limit = 3, offset = 0, sortField, sortBy } = req.body;
         limit = parseInt(limit);
         offset = parseInt(offset);
         let aggregation = [];
@@ -125,6 +125,17 @@ const getAllFreightRates = async (req, res) => {
                 }
             });
         }
+
+        aggregation.push({
+            $project: {
+                containerSize: 1,
+                departureCountry: 1,
+                departurePort: 1,
+                arrivalCountry: 1,
+                arrivalPort: 1,
+                basePrice: 1
+            }
+        });
 
         aggregation.push({
             $facet: {
