@@ -24,7 +24,7 @@ const startServer = async () => {
         app.use('/api/users', userRoutes);
         app.use('/api/admin', adminRoutes);
 
-        const PORT = config.PORT || 1010;
+        const PORT = config.PORT || 8888;
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
