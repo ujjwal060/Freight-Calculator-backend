@@ -1,5 +1,5 @@
 import FreightRate from "../../models/freightRateModel.js";
-import Booking from "../../models/bookingModel.js";
+import { Booking, Counter } from "../../models/bookingModel.js";
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -94,7 +94,14 @@ const createBooking = async (req, res) => {
             return res.status(404).json({ status: 404, message: "Freight rate not found" });
         }
 
+        const counter = await Counter.findOneAndUpdate(
+            { name: "bookingId" },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+
         const booking = new Booking({
+            bookingId: `Ft-${1000 + counter.seq}`,
             userId,
             freightRateId,
             eta,
@@ -140,6 +147,7 @@ const getBookings = async (req, res) => {
             {
                 $project: {
                     _id: 1,
+                    bookingId: 1,
                     userId: 1,
                     freightRateId: 1,
                     "freightRate.departureCountry": 1,
@@ -170,6 +178,105 @@ const getBookings = async (req, res) => {
     }
 };
 
-export { calculateFreight, createBooking, getBookings };
+const getTrackingId = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        const bookings = await Booking.find({
+            userId: userId,
+            status: { $ne: "Delivered" }
+        }).sort({ createdAt: -1 });
+
+        if (!bookings || bookings.length === 0) {
+            return res.status(404).json({ status: 404, message: "No active bookings found for user" });
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: "Tracking IDs retrieved",
+            data: {
+                trackingIds: bookings.map(b => b.bookingId)
+            }
+        })
+
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+};
+
+const getBookingById = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const userId = req.user?.userId;
+
+        if (!bookingId) {
+            return res.status(400).json({ status: 400, message: "bookingId is required" });
+        }
+
+        let aggregation = [];
+
+        aggregation.push({
+            $match: {
+                userId: new ObjectId(userId),
+                bookingId:bookingId
+            }
+        });
+
+        aggregation.push({
+            $lookup: {
+                from: "freightrates",
+                localField: "freightRateId",
+                foreignField: "_id",
+                as: "freightRate"
+            }
+        });
+
+        aggregation.push({
+            $unwind: {
+                path: "$freightRate",
+                preserveNullAndEmptyArrays: true,
+            },
+        });
+
+        aggregation.push({
+            $project: {
+                _id: 1,
+                bookingId: 1,
+                userId: 1,
+                freightRateId: 1,
+                "freightRate.departureCountry": 1,
+                "freightRate.departurePort": 1,
+                "freightRate.arrivalCountry": 1,
+                "freightRate.arrivalPort": 1,
+                "freightRate.containerSize": 1,
+                "freightRate.containerType": 1,
+                eta: 1,
+                price: 1,
+                totalContainers: 1,
+                containerType: 1,
+                status: 1,
+                createdAt: 1,
+            },
+        });
+
+        const booking = await Booking.aggregate(aggregation);
+
+        if (!booking || booking.length === 0) {
+            return res.status(404).json({ status: 404, message: "Booking not found" });
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: "Booking retrieved",
+            data: booking[0]
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500, message: error.message
+        })
+    }
+}
+
+export { calculateFreight, createBooking, getBookings, getTrackingId, getBookingById };
 
 
