@@ -6,6 +6,8 @@ const BookingSchema = new mongoose.Schema(
         freightRateId: { type: mongoose.Schema.Types.ObjectId, ref: "FreightRate", required: true },
         eta: { type: Date },
         price: { type: Number, required: true },
+        containerType: { type: String, enum: ['Dry', 'Reefer'], required: true },
+        totalContainers: { type: Number, required: true },
         status: { type: String, enum: ['Pending', 'Confirmed', 'Cancelled'], default: 'Pending' },
     },
     { timestamps: true }

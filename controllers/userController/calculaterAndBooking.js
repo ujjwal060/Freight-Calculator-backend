@@ -11,8 +11,11 @@ const calculateFreight = async (req, res) => {
             departureCountry,
             departurePort,
             arrivalCountry,
-            arrivalPort
+            arrivalPort,
+            totalContainers
+
         } = req.body;
+
 
         const fields = [
             { key: "containerSize", value: containerSize },
@@ -20,7 +23,8 @@ const calculateFreight = async (req, res) => {
             { key: "departureCountry", value: departureCountry },
             { key: "departurePort", value: departurePort },
             { key: "arrivalCountry", value: arrivalCountry },
-            { key: "arrivalPort", value: arrivalPort }
+            { key: "arrivalPort", value: arrivalPort },
+            { key: "totalContainers", value: totalContainers }
         ];
         const missing = fields.find(f => !f.value);
         if (missing) {
@@ -39,14 +43,20 @@ const calculateFreight = async (req, res) => {
             return res.status(404).json({ status: 404, message: "No matching freight rate found" });
         }
 
-        const base = containerType === 'Reefer' ? rate.basePrice.Reefer : rate.basePrice.Dry;
+        let base;
+        if (containerType === "Reefer") {
+            base = rate.basePrice.Reefer;
+        } else {
+            base = rate.basePrice.Dry;
+        }
+        const totalPrice = base * totalContainers;
 
         return res.status(200).json({
             status: 200,
             message: "Freight price calculated",
             data: {
                 freightRateId: rate._id,
-                price: base,
+                price: totalPrice,
             }
         });
     } catch (error) {
@@ -60,14 +70,18 @@ const createBooking = async (req, res) => {
         const {
             freightRateId,
             eta,
-            price
+            price,
+            totalContainers,
+            containerType
         } = req.body;
 
         const required = [
             { key: "userId", value: userId },
             { key: "freightRateId", value: freightRateId },
             { key: "eta", value: eta },
-            { key: "price", value: price }
+            { key: "price", value: price },
+            { key: "totalContainers", value: totalContainers },
+            { key: "containerType", value: containerType }
         ];
 
         const missing = required.find(r => !r.value);
@@ -85,6 +99,8 @@ const createBooking = async (req, res) => {
             freightRateId,
             eta,
             price,
+            totalContainers,
+            containerType
         });
 
         await booking.save();
@@ -134,6 +150,8 @@ const getBookings = async (req, res) => {
                     "freightRate.containerType": 1,
                     eta: 1,
                     price: 1,
+                    totalContainers: 1,
+                    containerType: 1,
                     status: 1,
                     createdAt: 1,
                 },
