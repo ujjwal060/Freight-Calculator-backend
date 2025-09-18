@@ -6,11 +6,6 @@ const FreightRateSchema = new mongoose.Schema({
         enum: ['20ft', '20ft HQ', '40ft', '40ft HQ'],
         required: true
     },
-    //   containerType: { 
-    //     type: String, 
-    //     enum: ['Dry', 'Reefer'], 
-    //     required: true 
-    //   },
     departureCountry: { type: String, required: true },
     departurePort: { type: String, required: true },
     arrivalCountry: { type: String, required: true },
