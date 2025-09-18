@@ -13,5 +13,3 @@ router.get('/get-tracking-id', authenticateUser, getTrackingId);
 router.get('/get-booking/:bookingId', authenticateUser, getBookingById);
 
 export default router;
-
-

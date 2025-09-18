@@ -278,5 +278,3 @@ const getBookingById = async (req, res) => {
 }
 
 export { calculateFreight, createBooking, getBookings, getTrackingId, getBookingById };
-
-
