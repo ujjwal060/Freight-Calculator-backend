@@ -20,7 +20,12 @@ const getAllBookings = async (req, res) => {
             }
         });
 
-        aggregation.push({ $unwind: "$user" });
+        aggregation.push({
+            $unwind: {
+                path: "$user",
+                preserveNullAndEmptyArrays: true
+            }
+        });
 
         aggregation.push({
             $lookup: {
@@ -31,7 +36,12 @@ const getAllBookings = async (req, res) => {
             }
         });
 
-        aggregation.push({ $unwind: "$freightRate" });
+        aggregation.push({
+            $unwind: {
+                path: "$freightRate",
+                preserveNullAndEmptyArrays: true
+            }
+        });
 
 
         if (sortField) {
@@ -139,7 +149,7 @@ const getAllBookingCounts = async (req, res) => {
 }
 
 const updateBookingStatus = async (req, res) => {
-    try{
+    try {
         const { bookingId } = req.params;
         const { status } = req.body;
 
@@ -165,7 +175,7 @@ const updateBookingStatus = async (req, res) => {
             data: booking
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
             status: 500,
             message: error.message
