@@ -9,7 +9,7 @@ const config = await loadConfig();
 
 const signup = async (req, res) => {
     try {
-        const { name, email, mobileNumber,password } = req.body;
+        const { name, email, mobileNumber, password } = req.body;
         const fields = [
             { key: "name", value: name },
             { key: "email", value: email },
@@ -128,17 +128,31 @@ const verifyOtp = async (req, res) => {
 
         user.otp = undefined;
         user.otpExpiry = undefined;
-        user.isVerified = true;
 
-        await user.save();
-        const token = jwt.sign({ id: user._id }, config.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+        if (!user.isVerified) {
+            user.isVerified = true;
+            await user.save();
 
-        return res.status(200).json({
-            status: 200,
-            message: "OTP verified successfully. Now set your password.",
-            token,
-            data: user
-        });
+            return res.status(200).json({
+                status: 200,
+                message: "Email verified successfully. You can now login.",
+                data: user
+            });
+        } else {
+            await user.save();
+
+            const resetToken = jwt.sign(
+                { id: user._id, action: "resetPassword" },
+                config.ACCESS_TOKEN_SECRET,
+                { expiresIn: '15m' }
+            );
+
+            return res.status(200).json({
+                status: 200,
+                message: "OTP verified successfully. You can now reset your password.",
+                token:resetToken
+            });
+        }
 
     } catch (error) {
         return res.status(500).json({
