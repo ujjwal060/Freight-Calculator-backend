@@ -14,6 +14,7 @@ const signup = async (req, res) => {
             { key: "name", value: name },
             { key: "email", value: email },
             { key: "mobileNumber", value: mobileNumber },
+            { key: "password", value: password },
         ];
 
         const missing = fields.find(f => !f.value);
@@ -32,7 +33,7 @@ const signup = async (req, res) => {
                 if (existingUser.email === email && existingUser.mobileNumber === mobileNumber) {
                     return res.status(400).json({
                         status: 400,
-                        message: `This email ${email} and mobile number ${mobileNumber} are already registered. Please login or reset your password.`,
+                        message: `This email ${email} is already registered. Please login or reset your password.`,
                     });
                 } else if (existingUser.email === email) {
                     return res.status(400).json({
@@ -46,33 +47,23 @@ const signup = async (req, res) => {
                     });
                 }
             } else {
-                const { otp, expiry } = generateOTP();
-                existingUser.otp = otp;
-                existingUser.otpExpiry = expiry;
-                await existingUser.save();
-
-                const { subject, body } = emailTamplates.signupOTP(name, otp);
-                const otpSent = await sendEmail({ email, subject, body });
-                if (!otpSent.success) {
-                    return res.status(500).json({
-                        status: 500,
-                        message: otpSent.message,
-                    });
-                }
-
-                return res.status(200).json({
-                    status: 200,
-                    message: "OTP re-sent. Please verify your account."
+                return res.status(400).json({
+                    status: 400,
+                    message: "User already exists but not verified. Please check your email to verify."
                 });
             }
         }
 
         const { otp, expiry } = generateOTP();
 
+        const bcrypt = require("bcryptjs");
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = new userModel({
             name,
             email,
             mobileNumber,
+            password: hashedPassword,
             otp,
             otpExpiry: expiry,
             isVerified: false
