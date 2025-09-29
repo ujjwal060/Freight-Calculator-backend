@@ -9,7 +9,7 @@ const config = await loadConfig();
 
 const signup = async (req, res) => {
     try {
-        const { name, email, mobileNumber } = req.body;
+        const { name, email, mobileNumber,password } = req.body;
         const fields = [
             { key: "name", value: name },
             { key: "email", value: email },
