@@ -56,7 +56,6 @@ const signup = async (req, res) => {
 
         const { otp, expiry } = generateOTP();
 
-        const bcrypt = require("bcryptjs");
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new userModel({
