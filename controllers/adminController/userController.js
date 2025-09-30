@@ -1,11 +1,35 @@
 import userModel from '../../models/userModel.js';
 
 const getAllUsers = async (req, res) => {
-    try{
+    try {
         let { limit = 3, offset = 0, sortField, sortBy } = req.body;
         limit = parseInt(limit);
         offset = parseInt(offset);
         let aggregation = [];
+
+        if (filters.name) {
+            aggregation.push({
+                $match: {
+                    name: { $regex: filters.name, $options: 'i' }
+                }
+            });
+        }
+
+        if (filters.email) {
+            aggregation.push({
+                $match: {
+                    email: { $regex: filters.email, $options: 'i' }
+                }
+            });
+        }
+
+        if (filters.mobileNumber) {
+            aggregation.push({
+                $match: {
+                    mobileNumber: { $regex: filters.mobileNumber, $options: 'i' }
+                }
+            });
+        }
 
         if (sortField) {
             aggregation.push({
@@ -21,7 +45,7 @@ const getAllUsers = async (req, res) => {
                 mobileNumber: 1,
             }
         });
-        
+
         aggregation.push({
             $facet: {
                 data: [
@@ -44,7 +68,7 @@ const getAllUsers = async (req, res) => {
             data: users,
             totalCount
         });
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
             success: false,
             message: error.message,
