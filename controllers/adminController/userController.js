@@ -7,7 +7,7 @@ const getAllUsers = async (req, res) => {
         offset = parseInt(offset);
         let aggregation = [];
 
-        if (filters.name) {
+        if (filters?.name) {
             aggregation.push({
                 $match: {
                     name: { $regex: filters.name, $options: 'i' }
@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
             });
         }
 
-        if (filters.email) {
+        if (filters?.email) {
             aggregation.push({
                 $match: {
                     email: { $regex: filters.email, $options: 'i' }
@@ -23,7 +23,7 @@ const getAllUsers = async (req, res) => {
             });
         }
 
-        if (filters.mobileNumber) {
+        if (filters?.mobileNumber) {
             aggregation.push({
                 $match: {
                     mobileNumber: { $regex: filters.mobileNumber, $options: 'i' }
