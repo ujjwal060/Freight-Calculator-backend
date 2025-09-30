@@ -2,7 +2,7 @@ import userModel from '../../models/userModel.js';
 
 const getAllUsers = async (req, res) => {
     try {
-        let { limit = 3, offset = 0, sortField, sortBy } = req.body;
+        let { limit = 3, offset = 0, sortField, sortBy,filters } = req.body;
         limit = parseInt(limit);
         offset = parseInt(offset);
         let aggregation = [];
