@@ -218,7 +218,7 @@ const getBookingById = async (req, res) => {
         aggregation.push({
             $match: {
                 userId: new ObjectId(userId),
-                bookingId:bookingId
+                bookingId: bookingId
             }
         });
 
@@ -277,4 +277,113 @@ const getBookingById = async (req, res) => {
     }
 }
 
-export { calculateFreight, createBooking, getBookings, getTrackingId, getBookingById };
+const getAllSize = async (req, res) => {
+    try {
+        const sizes = await FreightRate.distinct("containerSize");
+        return res.status(200).json({
+            status: 200,
+            message: "Container sizes retrieved",
+            data: sizes
+        });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+const getAllType = async (req, res) => {
+    try {
+        let aggregation = [];
+
+        aggregation.push({
+            $project: {
+                basePriceArray: { $objectToArray: "$basePrice" }
+            }
+        });
+
+        aggregation.push({ $unwind: "$basePriceArray" });
+
+        aggregation.push({
+            $group: {
+                _id: null,
+                types: { $addToSet: "$basePriceArray.k" }
+            }
+        });
+
+        aggregation.push({
+            $project: {
+                _id: 0,
+                types: 1
+            }
+        })
+
+        const types = await FreightRate.aggregate(aggregation);
+        return res.status(200).json({
+            status: 200,
+            message: "Container types retrieved",
+            data: types[0]?.types || []
+        });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+const getAllDepartureCountries = async (req, res) => {
+    try{
+        const countries = await FreightRate.distinct("departureCountry");
+        return res.status(200).json({
+            status: 200,
+            message: "Departure countries retrieved",
+            data: countries
+        });
+
+    }catch(error){
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+const getAllDeparturePorts = async (req, res) => {
+    try{
+        const { country } = req.params;
+        const ports = await FreightRate.distinct("departurePort", { departureCountry: country });
+        return res.status(200).json({
+            status: 200,
+            message: "Departure ports retrieved",
+            data: ports
+        });
+
+    }catch(error){
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+const getAllArrivalCountries = async (req, res) => {
+    try{
+        const countries = await FreightRate.distinct("arrivalCountry");
+        return res.status(200).json({
+            status: 200,
+            message: "Arrival countries retrieved",
+            data: countries
+        });
+
+    }catch(error){
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+const getAllArrivalPorts = async (req, res) => {
+    try{
+        const { country } = req.params;
+        const ports = await FreightRate.distinct("arrivalPort", { arrivalCountry: country });
+        return res.status(200).json({
+            status: 200,
+            message: "Arrival ports retrieved",
+            data: ports
+        });
+
+    }catch(error){
+        return res.status(500).json({ status: 500, message: error.message });
+    }
+}
+
+
+export { calculateFreight, createBooking, getBookings, getTrackingId, getBookingById, getAllSize, getAllType, getAllArrivalCountries, getAllArrivalPorts, getAllDepartureCountries, getAllDeparturePorts };
