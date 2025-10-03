@@ -303,6 +303,46 @@ const resendOtp = async (req, res) => {
     }
 }
 
+const changePassword = async (req, res) => {
+    try{
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user.id;
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({
+                status: 400,
+                message: "Old password and new password are required",
+            });
+        }
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found",
+            });
+        }
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                status: 401,
+                message: "The old password you entered is incorrect. Please check and try again.",
+            });
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+        return res.status(200).json({
+            status: 200,
+            message: "Password changed successfully",
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: 500,
+            message: error.message,
+        });
+    }
+}
+
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
