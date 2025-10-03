@@ -306,7 +306,7 @@ const resendOtp = async (req, res) => {
 const changePassword = async (req, res) => {
     try{
         const { oldPassword, newPassword } = req.body;
-        const userId = req.user.id;
+        const userId = req.user.userId;
         if (!oldPassword || !newPassword) {
             return res.status(400).json({
                 status: 400,
