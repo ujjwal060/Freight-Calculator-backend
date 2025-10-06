@@ -168,4 +168,9 @@ const getAllFreightRates = async (req, res) => {
     }
 }
 
-export { addFreightRate, updateFreightRate, deleteFreightRate, getAllFreightRates };
+export { 
+    addFreightRate, 
+    updateFreightRate, 
+    deleteFreightRate, 
+    getAllFreightRates 
+};

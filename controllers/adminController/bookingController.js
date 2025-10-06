@@ -184,4 +184,8 @@ const updateBookingStatus = async (req, res) => {
 }
 
 
-export { getAllBookings, getAllBookingCounts, updateBookingStatus };
+export { 
+    getAllBookings, 
+    getAllBookingCounts, 
+    updateBookingStatus 
+};

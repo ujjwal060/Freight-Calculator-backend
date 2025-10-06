@@ -386,4 +386,16 @@ const getAllArrivalPorts = async (req, res) => {
 }
 
 
-export { calculateFreight, createBooking, getBookings, getTrackingId, getBookingById, getAllSize, getAllType, getAllArrivalCountries, getAllArrivalPorts, getAllDepartureCountries, getAllDeparturePorts };
+export { 
+    calculateFreight, 
+    createBooking, 
+    getBookings, 
+    getTrackingId, 
+    getBookingById, 
+    getAllSize, 
+    getAllType, 
+    getAllArrivalCountries, 
+    getAllArrivalPorts, 
+    getAllDepartureCountries, 
+    getAllDeparturePorts 
+};

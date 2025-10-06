@@ -64,4 +64,7 @@ const refreshToken = async (req, res) => {
     }
 }
 
-export { authenticateUser, refreshToken };
+export { 
+    authenticateUser, 
+    refreshToken
+};

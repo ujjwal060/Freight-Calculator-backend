@@ -460,4 +460,14 @@ const editUserProfile = async (req, res) => {
 };
 
 
-export { signup, verifyOtp, setPassword, forgotPassword, resendOtp, login, getUserProfile, editUserProfile, changePassword };
+export { 
+    signup, 
+    verifyOtp, 
+    setPassword, 
+    forgotPassword, 
+    resendOtp, 
+    login, 
+    getUserProfile, 
+    editUserProfile, 
+    changePassword 
+};

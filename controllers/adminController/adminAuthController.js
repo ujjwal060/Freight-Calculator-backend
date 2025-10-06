@@ -256,4 +256,10 @@ const resendAdminOtp = async (req, res) => {
     }
 };
 
-export { loginAdmin, forgotPassword, verifyOtp, setPassword, resendAdminOtp };
+export { 
+    loginAdmin, 
+    forgotPassword,
+    verifyOtp, 
+    setPassword, 
+    resendAdminOtp 
+};
