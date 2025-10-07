@@ -1,4 +1,7 @@
 import { Booking } from "../../models/bookingModel.js";
+import User from "../../models/userModel.js";
+import { emailTamplates } from "../../utils/emailTemplate.js";
+import { sendEmail } from "../../utils/sendEmail.js";
 
 const getAllBookings = async (req, res) => {
     try {
@@ -160,12 +163,50 @@ const updateBookingStatus = async (req, res) => {
                 message: "Invalid status value"
             });
         }
-        const booking = await Booking.findByIdAndUpdate(bookingId, { status }, { new: true });
+        const booking = await Booking.findByIdAndUpdate(bookingId, { status }, { new: true })
+            .populate("userId").populate("freightRateId");
 
         if (!booking) {
             return res.status(404).json({
                 status: 404,
                 message: "Booking not found"
+            });
+        }
+
+        const userEmail = booking.userId?.email;
+        const userName = booking.userId?.name || "Customer";
+
+        let subject, body;
+
+        switch (status) {
+            case 'Confirmed':
+                ({ subject, body } = emailTamplates.bookingConfirmMail(
+                    userName,
+                    booking.bookingId,
+                    booking.eta
+                ));
+                break;
+
+            case 'Delivered':
+                ({ subject, body } = emailTamplates.bookingDeliveredMail(
+                    userName, booking.bookingId, booking.updatedAt, booking.freightRateId?.arrivalPort
+                ));
+                break;
+
+            case 'Cancelled':
+                ({ subject, body } = emailTamplates.bookingCancelledMail(
+                    userName,
+                    booking.bookingId
+                ));
+                break;
+        }
+
+        // const otpSent = await sendEmail({ email: userEmail, subject, body });
+
+        if (!otpSent.success) {
+            return res.status(500).json({
+                status: 500,
+                message: otpSent.message,
             });
         }
 
@@ -184,8 +225,8 @@ const updateBookingStatus = async (req, res) => {
 }
 
 
-export { 
-    getAllBookings, 
-    getAllBookingCounts, 
-    updateBookingStatus 
+export {
+    getAllBookings,
+    getAllBookingCounts,
+    updateBookingStatus
 };

@@ -1,5 +1,8 @@
 import FreightRate from "../../models/freightRateModel.js";
+import User from "../../models/userModel.js";
 import { Booking, Counter } from "../../models/bookingModel.js";
+import { emailTamplates } from '../../utils/emailTemplate.js';
+import { sendEmail } from '../../utils/sendEmail.js';
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -111,6 +114,20 @@ const createBooking = async (req, res) => {
         });
 
         await booking.save();
+
+        const userData = await User.findById(userId);
+        const userEmail = userData?.email;
+        const userName = userData?.name || "Customer";
+
+        const { subject, body } = emailTamplates.bookingMail(userName, booking.bookingId, containerType, price, booking.createdAt);
+        const otpSent = await sendEmail({ email: userEmail, subject, body });
+
+        if (!otpSent.success) {
+            return res.status(500).json({
+                status: 500,
+                message: otpSent.message,
+            });
+        }
 
         return res.status(201).json({ status: 201, message: "Booking created", data: booking });
     } catch (error) {
@@ -328,7 +345,7 @@ const getAllType = async (req, res) => {
 }
 
 const getAllDepartureCountries = async (req, res) => {
-    try{
+    try {
         const countries = await FreightRate.distinct("departureCountry");
         return res.status(200).json({
             status: 200,
@@ -336,13 +353,13 @@ const getAllDepartureCountries = async (req, res) => {
             data: countries
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ status: 500, message: error.message });
     }
 }
 
 const getAllDeparturePorts = async (req, res) => {
-    try{
+    try {
         const { country } = req.params;
         const ports = await FreightRate.distinct("departurePort", { departureCountry: country });
         return res.status(200).json({
@@ -351,13 +368,13 @@ const getAllDeparturePorts = async (req, res) => {
             data: ports
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ status: 500, message: error.message });
     }
 }
 
 const getAllArrivalCountries = async (req, res) => {
-    try{
+    try {
         const countries = await FreightRate.distinct("arrivalCountry");
         return res.status(200).json({
             status: 200,
@@ -365,13 +382,13 @@ const getAllArrivalCountries = async (req, res) => {
             data: countries
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ status: 500, message: error.message });
     }
 }
 
 const getAllArrivalPorts = async (req, res) => {
-    try{
+    try {
         const { country } = req.params;
         const ports = await FreightRate.distinct("arrivalPort", { arrivalCountry: country });
         return res.status(200).json({
@@ -380,22 +397,22 @@ const getAllArrivalPorts = async (req, res) => {
             data: ports
         });
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ status: 500, message: error.message });
     }
 }
 
 
-export { 
-    calculateFreight, 
-    createBooking, 
-    getBookings, 
-    getTrackingId, 
-    getBookingById, 
-    getAllSize, 
-    getAllType, 
-    getAllArrivalCountries, 
-    getAllArrivalPorts, 
-    getAllDepartureCountries, 
-    getAllDeparturePorts 
+export {
+    calculateFreight,
+    createBooking,
+    getBookings,
+    getTrackingId,
+    getBookingById,
+    getAllSize,
+    getAllType,
+    getAllArrivalCountries,
+    getAllArrivalPorts,
+    getAllDepartureCountries,
+    getAllDeparturePorts
 };

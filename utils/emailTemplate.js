@@ -119,5 +119,84 @@ const emailTamplates = {
     };
   },
 
+  bookingMail: (name, bookingId, containerType, totalAmount, bookingDate) => ({
+    subject: "Booking Confirmation - Freight Calculator",
+    body: `
+      Hi ${name},
+      
+      Thank you for booking your container with Freight Calculator!
+
+      Your booking has been successfully received and is now under review.
+
+      📋 Booking Details:
+      • Booking ID: ${bookingId}
+      • Container Type: ${containerType}
+      • Estimated Freight Charges: $${totalAmount}
+      • Booking Date: ${bookingDate}
+
+      Our operations team will confirm your booking shortly.
+
+      You will receive a confirmation email once your shipment is scheduled.
+
+      Best regards,  
+      Team Freight Calculator
+    `
+  }),
+
+  bookingConfirmMail: (name, bookingId, estimatedDeparture) => ({
+    subject: "Container Booking Confirmed - Freight Calculator",
+    body: `
+      Hi ${name},
+      
+      Great news! Your container booking has been confirmed.
+
+      📦 Booking ID: ${bookingId}
+      🗓️ Estimated Departure: ${estimatedDeparture}
+
+      Your shipment is now scheduled for dispatch. You will be notified once it’s in transit.
+
+      Thank you for choosing Freight Calculator for your logistics needs.  
+      Team Freight Calculator
+    `
+  }),
+
+  bookingDeliveredMail: (name, bookingId, deliveryDate, destinationPort) => ({
+    subject: "Shipment Delivered Successfully - Freight Calculator",
+    body: `
+      Hi ${name},
+
+      We're pleased to inform you that your shipment has been successfully delivered.
+
+      📦 Booking ID: ${bookingId}
+      📍 Destination Port: ${destinationPort}
+      📅 Delivery Date: ${deliveryDate}
+
+      Thank you for trusting Freight Calculator for your shipping needs.
+      We look forward to serving you again!
+
+      Warm regards,  
+      Team Freight Calculator
+    `
+  }),
+
+  bookingCancelledMail: (name, bookingId, reason) => ({
+    subject: "Container Booking Cancelled - Freight Calculator",
+    body: `
+      Hi ${name},
+      
+      We regret to inform you that your container booking has been cancelled.
+
+      ❌ Booking ID: ${bookingId}
+      📝 Reason: ${reason || "Not specified"}
+
+      If you wish to rebook or have questions about this cancellation, please contact our support team.
+
+      We apologize for the inconvenience and appreciate your understanding.
+
+      Sincerely,  
+      Team Freight Calculator
+    `
+  })
+
 }
 export { emailTamplates };
