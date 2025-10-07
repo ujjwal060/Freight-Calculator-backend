@@ -13,7 +13,7 @@ router.post('/book', authenticateUser, createBooking);
 
 router.get('/get-all-bookings', authenticateUser, getBookings);
 router.get('/get-tracking-id', authenticateUser, getTrackingId);
-router.get('/get-booking/:bookingId', authenticateUser, getBookingById);
+router.get('/get-booking/:bookingId', getBookingById);
 router.get('/get-all-sizes', getAllSize);
 router.get('/get-all-types', getAllType);
 router.get('/get-all-arrival-countries', getAllArrivalCountries);

@@ -17,6 +17,7 @@ const BookingSchema = new mongoose.Schema(
         containerType: { type: String, enum: ['Dry', 'Reefer'], required: true },
         totalContainers: { type: Number, required: true },
         status: { type: String, enum: ['Pending', 'Confirmed', 'Delivered', 'Cancelled'], default: 'Pending' },
+        cancellationReason: { type: String },
     },
     { timestamps: true }
 );

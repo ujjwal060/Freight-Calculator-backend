@@ -154,7 +154,7 @@ const getAllBookingCounts = async (req, res) => {
 const updateBookingStatus = async (req, res) => {
     try {
         const { bookingId } = req.params;
-        const { status } = req.body;
+        const { status, reason } = req.body;
 
         const validStatuses = ['Pending', 'Confirmed', 'Delivered', 'Cancelled'];
         if (!validStatuses.includes(status)) {
@@ -163,7 +163,19 @@ const updateBookingStatus = async (req, res) => {
                 message: "Invalid status value"
             });
         }
-        const booking = await Booking.findByIdAndUpdate(bookingId, { status }, { new: true })
+
+        const updateData = { status };
+        if (status === 'Cancelled') {
+            if (!reason) {
+                return res.status(400).json({
+                    status: 400,
+                    message: "Cancellation reason is required"
+                });
+            }
+            updateData.cancellationReason = reason;
+        }
+
+        const booking = await Booking.findByIdAndUpdate(bookingId, updateData, { new: true })
             .populate("userId").populate("freightRateId");
 
         if (!booking) {
@@ -196,7 +208,8 @@ const updateBookingStatus = async (req, res) => {
             case 'Cancelled':
                 ({ subject, body } = emailTamplates.bookingCancelledMail(
                     userName,
-                    booking.bookingId
+                    booking.bookingId,
+                    booking.cancellationReason || "No reason provided"
                 ));
                 break;
         }
