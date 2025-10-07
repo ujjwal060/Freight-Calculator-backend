@@ -201,7 +201,7 @@ const updateBookingStatus = async (req, res) => {
                 break;
         }
 
-        // const otpSent = await sendEmail({ email: userEmail, subject, body });
+        const otpSent = await sendEmail({ email: userEmail, subject, body });
 
         if (!otpSent.success) {
             return res.status(500).json({
