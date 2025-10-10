@@ -94,7 +94,7 @@ const createBooking = async (req, res) => {
 
         const rate = await FreightRate.findById(freightRateId);
         if (!rate) {
-            return res.status(404).json({ status: 404, message: "Freight rate not found" });
+            return res.status(404).json({ status: 404, message: "Freight rate is not available for this location." });
         }
 
         const counter = await Counter.findOneAndUpdate(
