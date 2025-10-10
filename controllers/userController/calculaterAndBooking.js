@@ -375,11 +375,33 @@ const getAllDeparturePorts = async (req, res) => {
 
 const getAllArrivalCountries = async (req, res) => {
     try {
-        const countries = await FreightRate.distinct("arrivalCountry");
+        const { departureCountry, departurePort } = req.body;
+        let aggregation = [];
+
+        if (!departureCountry || !departurePort) {
+            return res.status(400).json({
+                status: 400,
+                message: "Please provide departureCountry and departurePort"
+            });
+        }
+
+        aggregation.push({
+            $match: { departureCountry, departurePort }
+        });
+
+        aggregation.push({
+            $group: { _id: null, arrivalCountries: { $addToSet: "$arrivalCountry" } }
+        });
+
+        aggregation.push({
+            $project: { _id: 0, arrivalCountries: 1 }
+        })
+
+        const countries = await FreightRate.aggregate(aggregation);
         return res.status(200).json({
             status: 200,
             message: "Arrival countries retrieved",
-            data: countries
+            data: countries[0].arrivalCountries
         });
 
     } catch (error) {
@@ -389,12 +411,36 @@ const getAllArrivalCountries = async (req, res) => {
 
 const getAllArrivalPorts = async (req, res) => {
     try {
-        const { country } = req.params;
-        const ports = await FreightRate.distinct("arrivalPort", { arrivalCountry: country });
+        const { departureCountry, departurePort, arrivalCountry } = req.body;
+        let aggregation = [];
+
+        if (!departureCountry, !departurePort, !arrivalCountry) {
+            return res.status(400).json({
+                status: 400,
+                message: "Please provide departureCountry, departurePort and arrivalCountry"
+            });
+        }
+
+        aggregation.push({ $match: { departureCountry, departurePort, arrivalCountry } });
+        aggregation.push({
+            $group: {
+                _id: null,
+                arrivalPorts: { $addToSet: "$arrivalPort" }
+            }
+        });
+
+        aggregation.push({
+            $project: {
+                _id: 0,
+                arrivalPorts: 1
+            }
+        })
+
+        const result = await FreightRate.aggregate(aggregation);
         return res.status(200).json({
             status: 200,
-            message: "Arrival ports retrieved",
-            data: ports
+            message: "Arrival ports retrieved successfully",
+            data: result[0]?.arrivalPorts || []
         });
 
     } catch (error) {
