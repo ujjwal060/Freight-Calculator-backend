@@ -16,7 +16,6 @@ const calculateFreight = async (req, res) => {
             arrivalCountry,
             arrivalPort,
             totalContainers
-
         } = req.body;
 
 
